@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+service Calculator {
+  rpc Calculate (CalculateRequest) returns (CalculateResponse);
+}
+
+message CalculateRequest {
+  string operation = 1;
+  repeated double operands = 2;
+}
+
+message CalculateResponse {
+  double result = 1;
+  bool has_error = 2;
+  string error_message = 3;
+}
