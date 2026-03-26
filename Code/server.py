@@ -3,7 +3,7 @@ from concurrent import futures
 
 import calculator_pb2_grpc
 
-# import class logic của bạn (file loginserve)
+# import class logic (file loginserve)
 from loginserve import calculatorLogic
 
 
@@ -21,7 +21,7 @@ def serve():
 
     # 4. Khởi động server
     server.start()
-    print("🚀 Server đang chạy tại port 50051...")
+    print("Server đang chạy tại port 50051...")
 
     try:
         # 5. Giữ server chạy
@@ -29,9 +29,9 @@ def serve():
 
     except KeyboardInterrupt:
         # 6. Xử lý Ctrl + C (Graceful stop)
-        print("\n🛑 Đang tắt server...")
+        print("\n Đang tắt server...")
         server.stop(0)
-        print("✅ Server đã tắt an toàn")
+        print("Server đã tắt an toàn")
 
 
 if __name__ == '__main__':
