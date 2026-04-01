@@ -1,16 +1,18 @@
 syntax = "proto3";
 
+// Service nhận toàn bộ biểu thức dưới dạng chuỗi và trả về kết quả.
 service Calculator {
   rpc Calculate (CalculateRequest) returns (CalculateResponse);
 }
 
+// Client gửi lên 1 chuỗi biểu thức duy nhất, ví dụ: "5+2+sin(90)"
 message CalculateRequest {
-  string operation = 1;
-  repeated double operands = 2;
+  string expression = 1;
 }
 
+// Server trả về kết quả hoặc thông báo lỗi.
 message CalculateResponse {
-  double result = 1;
-  bool has_error = 2;
+  double result        = 1;
+  bool   has_error     = 2;
   string error_message = 3;
 }
