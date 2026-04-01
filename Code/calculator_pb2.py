@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10\x63\x61lculator.proto\"7\n\x10\x43\x61lculateRequest\x12\x11\n\toperation\x18\x01 \x01(\t\x12\x10\n\x08operands\x18\x02 \x03(\x01\"M\n\x11\x43\x61lculateResponse\x12\x0e\n\x06result\x18\x01 \x01(\x01\x12\x11\n\thas_error\x18\x02 \x01(\x08\x12\x15\n\rerror_message\x18\x03 \x01(\t2@\n\nCalculator\x12\x32\n\tCalculate\x12\x11.CalculateRequest\x1a\x12.CalculateResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10\x63\x61lculator.proto\"&\n\x10\x43\x61lculateRequest\x12\x12\n\nexpression\x18\x01 \x01(\t\"M\n\x11\x43\x61lculateResponse\x12\x0e\n\x06result\x18\x01 \x01(\x01\x12\x11\n\thas_error\x18\x02 \x01(\x08\x12\x15\n\rerror_message\x18\x03 \x01(\t2@\n\nCalculator\x12\x32\n\tCalculate\x12\x11.CalculateRequest\x1a\x12.CalculateResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -32,9 +32,9 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'calculator_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_CALCULATEREQUEST']._serialized_start=20
-  _globals['_CALCULATEREQUEST']._serialized_end=75
-  _globals['_CALCULATERESPONSE']._serialized_start=77
-  _globals['_CALCULATERESPONSE']._serialized_end=154
-  _globals['_CALCULATOR']._serialized_start=156
-  _globals['_CALCULATOR']._serialized_end=220
+  _globals['_CALCULATEREQUEST']._serialized_end=58
+  _globals['_CALCULATERESPONSE']._serialized_start=60
+  _globals['_CALCULATERESPONSE']._serialized_end=137
+  _globals['_CALCULATOR']._serialized_start=139
+  _globals['_CALCULATOR']._serialized_end=203
 # @@protoc_insertion_point(module_scope)
