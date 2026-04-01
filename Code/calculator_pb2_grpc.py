@@ -26,7 +26,8 @@ if _version_not_supported:
 
 
 class CalculatorStub(object):
-    """Missing associated documentation comment in .proto file."""
+    """Service nhận toàn bộ biểu thức dưới dạng chuỗi và trả về kết quả.
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -42,7 +43,8 @@ class CalculatorStub(object):
 
 
 class CalculatorServicer(object):
-    """Missing associated documentation comment in .proto file."""
+    """Service nhận toàn bộ biểu thức dưới dạng chuỗi và trả về kết quả.
+    """
 
     def Calculate(self, request, context):
         """Missing associated documentation comment in .proto file."""
@@ -67,7 +69,8 @@ def add_CalculatorServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class Calculator(object):
-    """Missing associated documentation comment in .proto file."""
+    """Service nhận toàn bộ biểu thức dưới dạng chuỗi và trả về kết quả.
+    """
 
     @staticmethod
     def Calculate(request,
