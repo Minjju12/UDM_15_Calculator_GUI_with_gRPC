@@ -29,7 +29,9 @@ class Calculator:
         #số hiển thị số
         self.main_var = tk.StringVar(value="0")
         tk.Label(frame, textvariable=self.main_var,font=("Segoe UI", 34, "bold"), bg=BG, fg="white",anchor="e").pack(fill="x")
-
+        #thanh trạng thái kết nối server
+        self.status_var = tk.StringVar(value="Đang kết nối...")
+        tk.Label(frame, textvariable=self.status_var,font=("Segoe UI", 9), bg=BG, fg="#4ade80",anchor="e").pack(fill="x")
         tk.Frame(self.root, bg="#3c3c3c", height=1).pack(fill="x", padx=14)
     #nút
     def _build_buttons(self):
