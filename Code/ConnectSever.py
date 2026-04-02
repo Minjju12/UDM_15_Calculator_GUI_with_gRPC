@@ -4,41 +4,41 @@ import calculator_pb2_grpc
 
 class CalculatorClient:
     def __init__(self):
-        # Thực hiện hỏi địa chỉ IP Server 
-        ip_address = self._ask_server_ip()
+        server_ip = self._ask_server_ip()
         
-        # Thiết lập kênh truyền tới cổng 50051 
-        target = f"{ip_address}:50051"
+        target = f"{server_ip}:50051"
         self.channel = grpc.insecure_channel(target)
         
-        # Tạo đối tượng stub để gọi hàm từ xa 
         self.stub = calculator_pb2_grpc.CalculatorStub(self.channel)
-
     def _ask_server_ip(self):
         ip = input("Nhập IP Server (để trống sẽ chọn localhost): ")
         return ip if ip.strip() else "localhost"
-
-    def _call(self, operation: str, operands: list):
-        # Truyền và nhận thông tin
+    
+    def _call_server(self, expr: str): 
         try:
             request = calculator_pb2.CalculateRequest(
-                operation=operation,
-                operands=operands
+                expression=expr 
             )
             response = self.stub.Calculate(request)
             return response
             
         except grpc.RpcError as e:
-            print(f"Lỗi kết nối gRPC: {e.details()}")
+            print(f"Lỗi kết nối gRPC hoặc Server ngắt kết nối: {e.details()}")
             return None
 
     def _ping_server(self):
         try:        
-            grpc.channel_ready_future(self.channel).result(timeout=2)
-            print("Trạng thái: Đã kết nối") 
-            return True
-        except grpc.FutureTimeoutError:
-            print("Trạng thái: Lỗi") 
+            req  = calculator_pb2.CalculateRequest(expression="1+1")
+            resp = self.stub.Calculate(req)
+            
+            if not resp.has_error: 
+                print("Trạng thái: Đã kết nối và sẵn sàng") 
+                return True
+            else:
+                print(f"Trạng thái: Server phản hồi lỗi - {resp.error_message}")
+                return False
+        except grpc.RpcError:
+            print("Trạng thái: Không kết nối được server (Timeout/Offline)") 
             return False
 
     def _on_close(self):
