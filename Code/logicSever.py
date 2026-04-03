@@ -1,79 +1,67 @@
+import grpc
 import math
+from concurrent import futures
 import calculator_pb2
 import calculator_pb2_grpc
 
-class calculatorLogic(calculator_pb2.CalculatorServicer):
+class CalculatorServicer(calculator_pb2_grpc.CalculatorServicer):
+    SAFE_MATH_ENV = {
+        "__builtins__": {},
+        "int":      int,
+        "math": math,
+        "sin":      math.sin,
+        "cos":      math.cos,
+        "tan":      math.tan,
+        "log":      math.log10,
+        "ln":       math.log,
+        "sqrt":     math.sqrt,
+        "cbrt":     math.cbrt,
+        "factorial": math.factorial,
+        "abs":      abs,
+        "pow":      math.pow,
+        "pi":       math.pi,
+        "e":        math.e,
+    }
+
     def Calculate(self, request, context):
-        operation = request.operation
-        operands = list(request.operands)
+        raw = request.expression.strip()
+        try:
+            result = self._safe_eval(raw)
+            return calculator_pb2.CalculateResponse(result=result, has_error=False)
+        except ZeroDivisionError:
+            return calculator_pb2.CalculateResponse(has_error=True, error_message="Không thể chia cho 0")
+        except ValueError as e:
+            return calculator_pb2.CalculateResponse(has_error=True, error_message=str(e))
+        except SyntaxError:
+            return calculator_pb2.CalculateResponse(has_error=True, error_message="Biểu thức không hợp lệ")
+        except Exception as e:
+            return calculator_pb2.CalculateResponse(has_error=True, error_message=f"Lỗi: {e}")
 
-        result, error_message = self._excute(operation, operands)
+    def _safe_eval(self, expr: str) -> float:
+        expr = expr.replace("π", "pi")          
+        expr = expr.replace("×", "*")           
+        expr = expr.replace("÷", "/")          
+        expr = expr.replace("mod", "%")         
+        expr = expr.replace("^", "**")          
+        expr = expr.replace("²", "**2")         
 
-        has_error = error_message != ""
+        while "!" in expr:
+            idx = expr.find("!")
+            left = idx - 1
+            if expr[left] == ")":
+                parens = 1
+                left -= 1
+                while left >= 0 and parens > 0:
+                    if expr[left] == ")": parens += 1
+                    elif expr[left] == "(": parens -= 1
+                    left -= 1
+                start = left + 1
+            else:
+                while left >= 0 and (expr[left].isdigit() or expr[left] == '.'):
+                    left -= 1
+                start = left + 1
+            operand = expr[start:idx]
+            expr = expr[:start] + f"factorial(int({operand}))" + expr[idx+1:]
 
-        return calculator_pb2_grpc.CalculateResponse(reuslt=result, has_error=has_error, error_message=error_message)
-    
-    def _excute(self, operation, operands):
-        op = operation.lower()
-
-        #nhóm 2 toán hạng
-        if op in ["add", "+", "subtract", "-", "multiply", "*", "divide", "/", "power", "^", "modulo", "%"]:
-            if len(operands) < 2:
-                return 0, "Lỗi phép tính yêu cầu ít nhất 2 toán hạng"
-            
-            a = operands[0]
-            b = operands[1]
-
-            if op in ["add", "+"]:
-                return a + b, ""
-            elif op in ["subtract", "-"]:
-                return a - b, ""
-            elif op in ["multiply", "*"]:
-                return a * b, ""
-            elif op in ["divide", "/"]:
-                if b == 0:
-                    return 0.0, "Lỗi!!! không thể chia cho 0"
-                return a / b, ""
-            elif op in ['power', '^']:
-                return math.pow(a,b), ""
-            elif op in ["modulo", "%"]:
-                if b == 0:
-                    return 0.0, "Lỗi!!! không thể chia lấy dư cho 0"
-                return a % b, ""
-            
-        #nhóm 1 toán hạng
-        elif op in ["sqrt", "square", "sin", "cos", "tan", "log", "ln", "factorial", "!", "negate", "abs"]:
-            a = operands[0]
-            if op == "sqrt":
-                if a < 0:
-                    return 0, "Lỗi!!! Không thể tính căn bậc 2 cho số âm"
-                return math.sqrt(a), ""
-            elif op == "square":
-                return a * a, ""
-            elif op == "sin":
-                return math.sin(math.radians(a)), ""
-            elif op == "cos":
-                return math.cos(math.radians(a)), ""
-            elif op == "tan":
-                if a % 180 == 90:
-                    return 0, "Lỗi!!! Không thể tính tan của gốc này"
-                return math.tan(math.radians(a)), ""
-            elif op == "log":
-                if a <= 0:
-                    return 0, "Lỗi!!! Biểu thức dưới dấu log (log10) phải > 0"
-                return math.log10(a), ""
-            elif op == "ln":
-                if a <= 0:
-                    return 0, "Lỗi!!! Biểu thức dưới dấu ln phải > 0"
-                return math.log(a), ""
-            elif op in ["factorial", "!"]:
-                if a < 0 or a >= 170 or not a.is_integer():
-                    return 0, "Lỗi!!! Không thể tính giai thừa"
-                return float(math.factorial(int(a))), ""
-            elif op == "negate":
-                return -a, ""
-            elif op == "abs":
-                return abs(a), ""
-            
-        else:
-            return 0, "Lỗi!!! phép tính này không được hỗ trợ"
+        result = eval(expr, self.SAFE_MATH_ENV)     
+        return float(result)
