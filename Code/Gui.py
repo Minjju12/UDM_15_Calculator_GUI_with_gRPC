@@ -166,7 +166,7 @@ class Calculator:
 
     def _on_click(self, key: str):
 
-        # ── C: Xóa sạch ───────────────────────────────────────────────────────
+        # C: Xóa sạch
         if key == "C":
             self.expression   = ""
             self.result_shown = False
@@ -174,7 +174,7 @@ class Calculator:
             self._refresh_display()
             return
 
-        # ── ⌫: Xóa 1 ký tự ───────────────────────────────────────────────────
+        # ⌫: Xóa 1 ký tự 
         if key == "⌫":
             if self.result_shown:
                 # Sau khi có kết quả, ⌫ xóa toàn bộ (giống iOS)
@@ -186,7 +186,7 @@ class Calculator:
             self._refresh_display()
             return
 
-        # ── = : Gửi lên server ────────────────────────────────────────────────
+        # = : Gửi lên server 
         if key == "=":
             expr = self.expression.strip()
             if not expr:
@@ -210,7 +210,7 @@ class Calculator:
                 self._refresh_display()
             return
 
-        # ── Nếu vừa hiển thị kết quả ─────────────────────────────────────────
+        # Nếu vừa hiển thị kết quả 
         # Bấm số/dấu chấm → bắt đầu biểu thức mới
         # Bấm toán tử     → dùng kết quả làm toán hạng đầu
         if self.result_shown:
@@ -225,7 +225,7 @@ class Calculator:
                 self.expression  += "×"
                 self.result_shown = False
 
-        # ── Chữ số & dấu chấm ────────────────────────────────────────────────
+        # Chữ số & dấu chấm 
         if key.isdigit():
             if not self._can_append_digit():
                 return   # Input Guard: vượt quá giới hạn
@@ -248,7 +248,7 @@ class Calculator:
             self._refresh_display()
             return
 
-        # ── Hằng số ───────────────────────────────────────────────────────────
+        # Hằng số 
         if key in ("π", "e"):
             # Nhân ẩn nếu trước đó là số hoặc đóng ngoặc
             if self.expression and (self.expression[-1].isdigit() or self.expression[-1] in (")", "π", "e")):
@@ -257,7 +257,7 @@ class Calculator:
             self._refresh_display()
             return
 
-        # ── Hàm 1 ngôi → in prefix dạng "func(" ──────────────────────────────
+        # Hàm 1 ngôi → in prefix dạng "func(" 
         # Khi bấm sin, cos, tan, log, ln, √, n!, abs(  → chèn chuỗi mở ngoặc
         FUNC_MAP = {
             "sin":  "sin(",
@@ -276,26 +276,51 @@ class Calculator:
             self._refresh_display()
             return
 
-        # ── n! → hậu tố "!" ───────────────────────────────────────────────────
+        # n! → hậu tố "!" 
         if key == "n!":
             if self.expression and (self.expression[-1].isdigit() or self.expression[-1] == ")"):
                 self.expression += "!"
                 self._refresh_display()
             return
 
-        # ── x² → hậu tố "²" ──────────────────────────────────────────────────
+        # x² → hậu tố "²" 
         if key == "x²":
             if self.expression and (self.expression[-1].isdigit() or self.expression[-1] in (")", "π", "e")):
                 self.expression += "²"
                 self._refresh_display()
             return
 
-        # ── xʸ → toán tử lũy thừa "^" ────────────────────────────────────────
+        # xʸ → toán tử lũy thừa "^" 
         if key == "xʸ":
             if self.expression and (self.expression[-1].isdigit() or self.expression[-1] in (")", "π", "e")):
                 self.expression += "^"
                 self._refresh_display()
             return
+
+         # ± : đổi dấu biểu thức hiện tại 
+        if key == "±":
+            if not self.expression:
+                self.expression = "-"
+            elif self.expression.startswith("-"):
+                self.expression = self.expression[1:]
+            else:
+                self.expression = "-(" + self.expression + ")"
+            self._refresh_display()
+            return
+
+        # % : thêm /100
+        if key == "%":
+            if self.expression:
+                self.expression += "/100"
+                self._refresh_display()
+            return
+
+        #mod
+        if key == "mod":
+            if self.expression:
+                self.expression += " mod "
+                self._refresh_display()
+            return        
 
 
 
