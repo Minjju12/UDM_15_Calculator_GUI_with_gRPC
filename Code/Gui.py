@@ -163,6 +163,143 @@ class Calculator:
     #on_click
     #==================
 
+    def _on_click(self, key: str):
+
+        # ── C: Xóa sạch ───────────────────────────────────────────────────────
+        if key == "C":
+            self.expression   = ""
+            self.result_shown = False
+            self.expr_var.set("")
+            self._refresh_display()
+            return
+
+        # ── ⌫: Xóa 1 ký tự ───────────────────────────────────────────────────
+        if key == "⌫":
+            if self.result_shown:
+                # Sau khi có kết quả, ⌫ xóa toàn bộ (giống iOS)
+                self.expression   = ""
+                self.result_shown = False
+            else:
+                self.expression = self.expression[:-1]
+            self.expr_var.set("")
+            self._refresh_display()
+            return
+
+        # ── = : Gửi lên server ────────────────────────────────────────────────
+        if key == "=":
+            expr = self.expression.strip()
+            if not expr:
+                return
+            # Tự đóng ngoặc còn thiếu
+            open_count = expr.count("(") - expr.count(")")
+            expr += ")" * max(open_count, 0)
+
+            self.expr_var.set(expr + "  =")
+            result, err = self._call_server(expr)
+
+            if err:
+                self.expression   = ""
+                self.result_shown = False
+                self.main_var.set("Lỗi")
+                self.main_lbl.configure(font=("Segoe UI", 34, "bold"))
+                self.expr_var.set(err)
+            else:
+                self.expression   = result
+                self.result_shown = True
+                self._refresh_display()
+            return
+
+        # ── Nếu vừa hiển thị kết quả ─────────────────────────────────────────
+        # Bấm số/dấu chấm → bắt đầu biểu thức mới
+        # Bấm toán tử     → dùng kết quả làm toán hạng đầu
+        if self.result_shown:
+            if key.isdigit() or key == ".":
+                self.expression   = ""
+                self.result_shown = False
+            elif key not in ("π", "e") and not key.endswith("("):
+                # Toán tử nhị phân, giữ kết quả làm vế trái
+                self.result_shown = False
+            else:
+                # Hàm/hằng số sau kết quả → nhân ẩn rồi tiếp tục
+                self.expression  += "×"
+                self.result_shown = False
+
+        # ── Chữ số & dấu chấm ────────────────────────────────────────────────
+        if key.isdigit():
+            if not self._can_append_digit():
+                return   # Input Guard: vượt quá giới hạn
+            # Xoá số 0 đứng đầu đơn lẻ
+            if self.expression.endswith("0") and not self.expression[:-1].endswith((".", *"0123456789")):
+                self.expression = self.expression[:-1]
+            self.expression += key
+            self._refresh_display()
+            return
+
+        if key == ".":
+            # Tránh 2 dấu chấm trong cùng 1 số
+            # Lấy phần số cuối (sau toán tử / dấu mở ngoặc cuối cùng)
+            import re
+            last_num_match = re.search(r'[\d.]+$', self.expression)
+            if last_num_match and "." in last_num_match.group():
+                return
+            if not self.expression or not self.expression[-1].isdigit():
+                self.expression += "0"
+            self.expression += "."
+            self._refresh_display()
+            return
+
+        # ── Hằng số ───────────────────────────────────────────────────────────
+        if key in ("π", "e"):
+            # Nhân ẩn nếu trước đó là số hoặc đóng ngoặc
+            if self.expression and (self.expression[-1].isdigit() or self.expression[-1] in (")", "π", "e")):
+                self.expression += "×"
+            self.expression += key
+            self._refresh_display()
+            return
+
+        # ── Hàm 1 ngôi → in prefix dạng "func(" ──────────────────────────────
+        # Khi bấm sin, cos, tan, log, ln, √, n!, abs(  → chèn chuỗi mở ngoặc
+        FUNC_MAP = {
+            "sin":  "sin(",
+            "cos":  "cos(",
+            "tan":  "tan(",
+            "log":  "log(",
+            "ln":   "ln(",
+            "√":    "sqrt(",
+            "abs(": "abs(",
+        }
+        if key in FUNC_MAP:
+            # Nhân ẩn nếu số / đóng ngoặc đứng trước
+            if self.expression and (self.expression[-1].isdigit() or self.expression[-1] in (")", "π", "e")):
+                self.expression += "×"
+            self.expression += FUNC_MAP[key]
+            self._refresh_display()
+            return
+
+        # ── n! → hậu tố "!" ───────────────────────────────────────────────────
+        if key == "n!":
+            if self.expression and (self.expression[-1].isdigit() or self.expression[-1] == ")"):
+                self.expression += "!"
+                self._refresh_display()
+            return
+
+        # ── x² → hậu tố "²" ──────────────────────────────────────────────────
+        if key == "x²":
+            if self.expression and (self.expression[-1].isdigit() or self.expression[-1] in (")", "π", "e")):
+                self.expression += "²"
+                self._refresh_display()
+            return
+
+        # ── xʸ → toán tử lũy thừa "^" ────────────────────────────────────────
+        if key == "xʸ":
+            if self.expression and (self.expression[-1].isdigit() or self.expression[-1] in (")", "π", "e")):
+                self.expression += "^"
+                self._refresh_display()
+            return
+
+
+
+
 if __name__ == "__main__":
     root = tk.Tk()
     Calculator(root)
