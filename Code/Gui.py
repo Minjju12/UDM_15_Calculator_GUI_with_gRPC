@@ -16,6 +16,16 @@ FG      = "white"
 #thêm giói hạn số vd 15 lần số 9 ,k được nhập nhiều
 MAX_CONSECUTIVE_DIGITS = 15
 
+def fmt(val: float) -> str:
+    """Định dạng số để hiển thị."""
+    if math.isnan(val):  return "NaN"
+    if math.isinf(val):  return "∞" if val > 0 else "-∞"
+    if abs(val) >= 1e15 or (abs(val) < 1e-9 and val != 0):
+        return f"{val:.6e}"
+    if val == int(val) and abs(val) < 1e15:
+        return str(int(val))
+    return f"{val:.10g}"
+
 class Calculator:
     def __init__(self, root):
         self.root = root
