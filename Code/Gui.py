@@ -1,4 +1,5 @@
 import tkinter as tk
+import re
 import grpc
 
 import calculator_pb2
@@ -238,7 +239,6 @@ class Calculator:
         if key == ".":
             # Tránh 2 dấu chấm trong cùng 1 số
             # Lấy phần số cuối (sau toán tử / dấu mở ngoặc cuối cùng)
-            import re
             last_num_match = re.search(r'[\d.]+$', self.expression)
             if last_num_match and "." in last_num_match.group():
                 return
