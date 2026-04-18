@@ -17,7 +17,6 @@ class CalculatorServicer(calculator_pb2_grpc.CalculatorServicer):
         "ln":       math.log,
         "sqrt":     math.sqrt,
         "cbrt":     math.cbrt,
-        "factorial": math.factorial,
         "gamma":    math.gamma,
         "abs":      abs,
         "pow":      math.pow,
