@@ -48,7 +48,7 @@ class CalculatorServicer(calculator_pb2_grpc.CalculatorServicer):
             return calculator_pb2.CalculateResponse(has_error=True, error_message="Không thể chia cho 0")
         except ValueError as e:
             if "math domain error" in str(e):
-                return calculator_pb2.CalculateResponse(has_error=True, error_message="Kết quả vô cực (-∞)")
+                return calculator_pb2.CalculateResponse(has_error=True, error_message="Ngoài miền xác định")
             return calculator_pb2.CalculateResponse(has_error=True, error_message=str(e))
         except SyntaxError:
             return calculator_pb2.CalculateResponse(has_error=True, error_message="Biểu thức không hợp lệ")
@@ -76,6 +76,8 @@ class CalculatorServicer(calculator_pb2_grpc.CalculatorServicer):
                     elif expr[left] == "(": parens -= 1
                     left -= 1
                 start = left + 1
+                while start > 0 and expr[start - 1].isalpha():
+                    start -= 1
             else:
                 # Quét lùi để tìm điểm bắt đầu của con số
                 while left >= 0 and (expr[left].isdigit() or expr[left] == '.'):
