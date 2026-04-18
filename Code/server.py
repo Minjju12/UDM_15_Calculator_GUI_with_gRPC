@@ -9,8 +9,6 @@ class CalculatorServicer(calculator_pb2_grpc.CalculatorServicer):
     # Các hàm toán học được phép dùng trong eval()
     SAFE_MATH_ENV = {
         "__builtins__": {},
-        "int":      int,
-        "math": math,
         # Hàm thông dụng
         "sin":      math.sin,
         "cos":      math.cos,
@@ -20,6 +18,7 @@ class CalculatorServicer(calculator_pb2_grpc.CalculatorServicer):
         "sqrt":     math.sqrt,
         "cbrt":     math.cbrt,
         "factorial": math.factorial,
+        "gamma":    math.gamma,
         "abs":      abs,
         "pow":      math.pow,
         # Hằng số
@@ -42,10 +41,14 @@ class CalculatorServicer(calculator_pb2_grpc.CalculatorServicer):
                 return calculator_pb2.CalculateResponse(has_error=True, error_message=f"Kết quả vô cực ({sign})")
 
             return calculator_pb2.CalculateResponse(result=result, has_error=False)
-
+        
+        except OverflowError:
+            return calculator_pb2.CalculateResponse(has_error=True, error_message="Kết quả vô cực (∞)")
         except ZeroDivisionError:
             return calculator_pb2.CalculateResponse(has_error=True, error_message="Không thể chia cho 0")
         except ValueError as e:
+            if "math domain error" in str(e):
+                return calculator_pb2.CalculateResponse(has_error=True, error_message="Kết quả vô cực (-∞)")
             return calculator_pb2.CalculateResponse(has_error=True, error_message=str(e))
         except SyntaxError:
             return calculator_pb2.CalculateResponse(has_error=True, error_message="Biểu thức không hợp lệ")
@@ -81,7 +84,7 @@ class CalculatorServicer(calculator_pb2_grpc.CalculatorServicer):
             
             # Tách biểu thức cần tính giai thừa và thay thế vào chuỗi
             operand = expr[start:idx]
-            expr = expr[:start] + f"factorial(int({operand}))" + expr[idx+1:]
+            expr = expr[:start] + f"gamma(({operand}) + 1)" + expr[idx+1:]
 
         print(f"[SERVER] parsed  ={expr!r}")
         result = eval(expr, self.SAFE_MATH_ENV)   
